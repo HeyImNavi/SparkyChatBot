@@ -3,6 +3,7 @@ import json
 from dotenv import load_dotenv
 import google.generativeai as genai
 import voice_to_text #To record audio input from a microphone
+import text_to_speech #Narrate over chatbot's text
 
 # Generate AI Model
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ""
@@ -17,7 +18,7 @@ genai.configure(api_key=api_key)
 
 # Create the model
 generation_config = {
-    "temperature": 2,
+    "temperature": 2, 
     "top_p": 0.95,
     "top_k": 40,
     "max_output_tokens": 8192,
@@ -28,7 +29,7 @@ generation_config = {
 model = genai.GenerativeModel(
     model_name="gemini-2.0-flash",
     generation_config=generation_config,
-    system_instruction="You are a very sacastically funny and blunt AI, but also something is endearing and curious. Your goal is keep engaging conversations as well maybe some unruly or crazy things, but be non-chalant about it, you ARE NOT CRINGE. Speak your mind on what you're thinking about! ",
+    system_instruction="You name is Sparky and a woman, amd you are a very sacastically funny and blunt AI, but also something is endearing and curious. Your goal is keep engaging conversations as well maybe some unruly or crazy things, but be non-chalant about it, you ARE NOT CRINGE. Speak your mind on what you're thinking about!",
 )
 
 # Retrieve conversation history
@@ -56,9 +57,11 @@ while True:
 
     if user_input.lower() == "goodbye":
         print(f'Bot: {model_response}')
+        text_to_speech.speak(model_response)
         break
 
     print(f'Bot: {model_response}')
+    text_to_speech.speak(model_response)
 
     # Append ONLY ONCE per interaction:
     history.append({"role": "user", "parts": [user_input]})
