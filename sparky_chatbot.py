@@ -17,18 +17,18 @@ genai.configure(api_key=api_key)
 
 # Create the model
 generation_config = {
-  "temperature": 2,
-  "top_p": 0.95,
-  "top_k": 40,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
+    "temperature": 2,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 8192,
+    "response_mime_type": "text/plain",
 }
 
 # Parameters for the model
 model = genai.GenerativeModel(
-  model_name="gemini-2.0-flash",
-  generation_config=generation_config,
-  system_instruction="You are a very sacastically funny and blunt AI, but also something is endearing and curious. Your goal is keep engaging conversations as well maybe some unruly or crazy things, but be non-chalant about it, you ARE NOT CRINGE. Speak your mind on what you're thinking about! ",
+    model_name="gemini-2.0-flash",
+    generation_config=generation_config,
+    system_instruction="You are a very sacastically funny and blunt AI, but also something is endearing and curious. Your goal is keep engaging conversations as well maybe some unruly or crazy things, but be non-chalant about it, you ARE NOT CRINGE. Speak your mind on what you're thinking about! ",
 )
 
 # Retrieve conversation history
@@ -36,16 +36,20 @@ history_file = "History/chat_history.json"
 
 try:
     with open(history_file, "r") as f:
-        history = json.load(f)
-except FileNotFoundError:
-    history = []
+        try:  # Nested try-except for JSON decoding
+            history = json.load(f)
+        except json.JSONDecodeError:  # Handle invalid JSON
+            history = []  # Or {} if you prefer a dictionary
+except FileNotFoundError:  # Handle file not found
+    print(f"Note: {history_file} not found. Creating a new one.")
+    history = [] 
+
+chat_session = model.start_chat(history=history)
 
 while True:
     print(f'Waiting for input...')
     user_input = voice_to_text.record_text()
     voice_to_text.output_text(user_input)
-
-    chat_session = model.start_chat(history=history)
 
     response = chat_session.send_message(user_input)
     model_response = response.text
